@@ -1,0 +1,11 @@
+
+[tool.poetry]
+name = "scrap-villes-a-vivre"
+authors = ["JeannotJeannot"]
+description = "This is a web scrapper for the website villesavivre.fr"
+version = "0.0.1"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+beautifulsoup4 = "^4.12.3"
