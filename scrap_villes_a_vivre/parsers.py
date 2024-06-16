@@ -4,15 +4,15 @@ from abc import ABC, abstractmethod
 from itertools import batched
 from typing import ClassVar, Self
 
-import bs4
+from bs4.element import ResultSet, Tag
 
 
 class SectionParser(ABC):
     """Base class for all section parsers."""
 
-    _section: bs4.element.Tag
+    _section: Tag
 
-    def __init__(self: Self, section: bs4.element.Tag) -> None:
+    def __init__(self: Self, section: Tag) -> None:
         """Initiate SectionParser.
 
         It needs section as an beautifulsoup.tag to extract informations from.
@@ -20,7 +20,7 @@ class SectionParser(ABC):
         self._section = section
 
     @abstractmethod
-    def get_all_informations(self: Self) -> bs4.element.ResultSet:
+    def get_all_informations(self: Self) -> ResultSet:
         """Return all usefull informations in the section.
 
         Returned informations are not formated.
@@ -38,10 +38,10 @@ class SectionParser(ABC):
 class SectionParserEconomie(SectionParser):
     """Parser for the economie section."""
 
-    def get_all_informations(self: Self) -> bs4.element.ResultSet:
+    def get_all_informations(self: Self) -> ResultSet:
         """Do the same as super."""
 
-        def _filter(tag: bs4.element.Tag) -> bool:
+        def _filter(tag: Tag) -> bool:
             """Filter the information for each tag in the economie section."""
             classes_raw = tag.get("class")
             classes: list = list(classes_raw) if classes_raw else []
@@ -54,7 +54,7 @@ class SectionParserEconomie(SectionParser):
 
     def link_number_with_description(self: Self) -> list[str]:
         """Do the same as super."""
-        zipped: list[tuple[bs4.element.Tag, bs4.element.Tag]] = list(
+        zipped: list[tuple[Tag, Tag]] = list(
             batched(self.get_all_informations(), 2),
         )
         results: list[str] = []

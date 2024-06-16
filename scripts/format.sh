@@ -1,7 +1,5 @@
 #!/bin/sh
-
-set -e # ensure no error appears
-source ./venv/Scripts/activate # Activate virtual env
+source scripts/initiate.sh # Initiate scripts
 
 ruff check . --fix
 black .
