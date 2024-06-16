@@ -4,7 +4,7 @@ import bs4
 import requests
 from bs4 import BeautifulSoup
 
-from .parsers import GetSectionParser, SectionParser
+from .parsers_sections import GetSectionParser, SectionParser
 
 WEBSITE: str = "https://www.villesavivre.fr/"
 town: str = "versailles-78646"
