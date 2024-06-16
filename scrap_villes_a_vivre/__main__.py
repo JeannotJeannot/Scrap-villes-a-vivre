@@ -15,6 +15,7 @@ page_analysed: BeautifulSoup = BeautifulSoup(page_raw, "html.parser")
 
 
 def get_all_sections(page_analysed: BeautifulSoup) -> bs4.element.ResultSet:
+    """Return all sections usefull in the web page."""
     if result := page_analysed.find_all(name="section", class_="city-content"):
         return result
     msg = "No section found !"
@@ -24,7 +25,6 @@ def get_all_sections(page_analysed: BeautifulSoup) -> bs4.element.ResultSet:
 sections: bs4.element.ResultSet = get_all_sections(page_analysed)
 informations: list[str] = []
 for section in sections:
-    if section["id"]  in GetSectionParser.get_handled_parsers():
-        parser: SectionParser = GetSectionParser.get_parser(section["id"])
+    if section["id"] in GetSectionParser.get_handled_parsers():
+        parser: type[SectionParser] = GetSectionParser.get_parser(section["id"])
         informations.extend(parser(section).parse())
-

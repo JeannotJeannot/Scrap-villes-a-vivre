@@ -43,3 +43,7 @@ fixable = ["ALL"]
 
 [tool.mypy]
 packages = ["scrap_villes_a_vivre"]
+
+[tool.black]
+target-version = ['py312']
+include = ["*.py"]
