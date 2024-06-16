@@ -34,6 +34,7 @@ class SectionParser(ABC):
     def parse(self: Self) -> list[str]:
         """Parse section and return the list of formatted information."""
 
+
 class SectionParserEconomie(SectionParser):
     """Parser for the economie section."""
 
@@ -82,7 +83,8 @@ class GetSectionParser:
 
     @classmethod
     def get_parser(
-        cls: type["GetSectionParser"], section_name: str,
+        cls: type["GetSectionParser"],
+        section_name: str,
     ) -> type[SectionParser]:
         """Return needed parser for selected section."""
         return cls._parsers[section_name]
