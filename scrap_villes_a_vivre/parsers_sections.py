@@ -53,13 +53,17 @@ class SectionParserDummy(SectionParser):
 class SectionParserPopulation(SectionParser):
     """Parser for useless section. It parses nothing."""
 
-    _info_balise: ClassVar[set[str]] = {"demo-content", }
+    _info_balise: ClassVar[set[str]] = {
+        "demo-content",
+    }
 
 
 class SectionParserPresentation(SectionParser):
     """Parser for Presentation section."""
 
-    _info_balise: ClassVar[set[str]] = {"dynamic-content", }
+    _info_balise: ClassVar[set[str]] = {
+        "dynamic-content",
+    }
 
 
 class SectionParserEconomie(SectionParser):
