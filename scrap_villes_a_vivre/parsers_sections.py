@@ -37,7 +37,10 @@ class SectionParser:
 
     def parse(self: Self) -> list[str]:
         """Parse section and return the list of formatted information."""
-        return [" ".join((info.text.strip()).split()) for info in self._get_all_informations()]
+        return [
+            " ".join((info.text.strip()).split())
+            for info in self._get_all_informations()
+        ]
 
 
 class SectionParserDummy(SectionParser):
