@@ -33,6 +33,53 @@ class SectionParserDummy(SectionParser):
         return []
 
 
+class SectionParserPopulation(SectionParser):
+    """Parser for useless section. It parses nothing."""
+
+    def get_all_informations(self: Self) -> ResultSet:
+        """Return all usefull informations in the section.
+
+        Returned informations are not formated.
+        """
+
+        def _filter(tag: Tag) -> bool:
+            """Filter the information for each tag in the economie section."""
+            classes: list[str] = tag.get("class") if tag.get("class") else []
+            return tag.name == "div" and ("demo-content" in classes)
+
+        if result := self._section.find_all(_filter):
+            return result
+        message = "No information found !"
+        raise ValueError(message)
+
+    def parse(self: Self) -> list[str]:
+        """Parse section and return the list of formatted information."""
+        return [str(info.text.strip()) for info in self.get_all_informations()]
+    
+class SectionParserPresentation(SectionParser):
+    """Parser for Presentation section."""
+
+    def get_all_informations(self: Self) -> ResultSet:
+        """Return all usefull informations in the section.
+
+        Returned informations are not formated.
+        """
+
+        def _filter(tag: Tag) -> bool:
+            """Filter the information for each tag in the economie section."""
+            classes: list[str] = tag.get("class") if tag.get("class") else []
+            return tag.name == "div" and ("dynamic-content" in classes)
+
+        if result := self._section.find_all(_filter):
+            return result
+        message = "No information found !"
+        raise ValueError(message)
+
+    def parse(self: Self) -> list[str]:
+        """Parse section and return the list of formatted information."""
+        return [str(info.text.strip()) for info in self.get_all_informations()]
+
+
 class SectionParserEconomie(SectionParser):
     """Parser for the economie section."""
 
@@ -44,8 +91,7 @@ class SectionParserEconomie(SectionParser):
 
         def _filter(tag: Tag) -> bool:
             """Filter the information for each tag in the economie section."""
-            classes_raw = tag.get("class")
-            classes: list = list(classes_raw) if classes_raw else []
+            classes: list[str] = tag.get("class", [])
             return tag.name == "p" and ("source" not in classes)
 
         if result := self._section.find_all(_filter):
@@ -61,7 +107,7 @@ class SectionParserEconomie(SectionParser):
         results: list[str] = []
         for number, description in zipped:
             results.append(
-                f"{number.string.strip()} {description.string.strip()}",
+                f"{number.text.strip()} {description.text.strip()}",
             )
         return results
 
@@ -80,6 +126,8 @@ class GetSectionParser:
         "politique": SectionParserDummy,
         "cityhall": SectionParserDummy,
         "compare": SectionParserDummy,
+        "population": SectionParserPopulation,
+        "presentation": SectionParserPresentation,
     }
 
     @classmethod
