@@ -27,10 +27,6 @@ class SectionParser(ABC):
         """
 
     @abstractmethod
-    def link_number_with_description(self: Self) -> list[str]:
-        """Format informations."""
-
-    @abstractmethod
     def parse(self: Self) -> list[str]:
         """Parse section and return the list of formatted information."""
 
@@ -49,11 +45,11 @@ class SectionParserEconomie(SectionParser):
 
         if result := self._section.find_all(_filter):
             return result
-        msg = "No information found !"
-        raise ValueError(msg)
+        message = "No information found !"
+        raise ValueError(message)
 
     def link_number_with_description(self: Self) -> list[str]:
-        """Do the same as super."""
+        """Link number with description."""
         zipped: list[tuple[Tag, Tag]] = list(
             batched(self.get_all_informations(), 2),
         )

@@ -26,16 +26,16 @@ types-requests = "^2.32.0.20240602"
 # Same as Black.
 line-length = 88
 indent-width = 4
-include = ["pyproject.toml", "scrap_villes_a_vivre/**/*.py"]
+include = ["pyproject.toml", "scrap_villes_a_vivre/**/*.py", "__main__.py"]
 
-# Assume Python 3.8
+# Assume Python 3.12
 target-version = "py312"
 
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "D203", #one-blank-line-before-class: delete useless blank line
-    "D213", #multi-line-summary-second-line: do not return for first comment line
+    "D203", # one-blank-line-before-class: delete useless blank line
+    "D213", # multi-line-summary-second-line: do not return for first comment line
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -45,5 +45,4 @@ fixable = ["ALL"]
 packages = ["scrap_villes_a_vivre"]
 
 [tool.black]
-target-version = ['py312']
-src = 'scrap_villes_a_vivre'
+target-version = ["py312"]
