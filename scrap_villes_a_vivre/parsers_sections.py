@@ -1,5 +1,6 @@
 """Define parsers for each sections of the website."""
 
+import logging
 from abc import ABC, abstractmethod
 from itertools import batched
 from typing import ClassVar, Self
@@ -20,22 +21,26 @@ class SectionParser(ABC):
         self._section = section
 
     @abstractmethod
-    def get_all_informations(self: Self) -> ResultSet:
-        """Return all usefull informations in the section.
-
-        Returned informations are not formated.
-        """
-
-    @abstractmethod
     def parse(self: Self) -> list[str]:
         """Parse section and return the list of formatted information."""
+
+
+class SectionParserDummy(SectionParser):
+    """Parser for useless section. It parses nothing."""
+
+    def parse(self: Self) -> list[str]:
+        """Parse section and return the list of formatted information."""
+        return []
 
 
 class SectionParserEconomie(SectionParser):
     """Parser for the economie section."""
 
     def get_all_informations(self: Self) -> ResultSet:
-        """Do the same as super."""
+        """Return all usefull informations in the section.
+
+        Returned informations are not formated.
+        """
 
         def _filter(tag: Tag) -> bool:
             """Filter the information for each tag in the economie section."""
@@ -70,6 +75,11 @@ class GetSectionParser:
 
     _parsers: ClassVar[dict[str, type[SectionParser]]] = {
         "economie": SectionParserEconomie,
+        "climat": SectionParserDummy,
+        "labels": SectionParserDummy,
+        "politique": SectionParserDummy,
+        "cityhall": SectionParserDummy,
+        "compare": SectionParserDummy,
     }
 
     @classmethod
@@ -83,4 +93,8 @@ class GetSectionParser:
         section_name: str,
     ) -> type[SectionParser]:
         """Return needed parser for selected section."""
+        if section_name not in cls._parsers:
+            message: str = f"Parser for {section_name} is not defined."
+            logging.warning(message)
+            return SectionParserDummy
         return cls._parsers[section_name]

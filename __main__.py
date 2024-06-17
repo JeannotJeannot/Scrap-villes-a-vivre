@@ -2,7 +2,7 @@
 
 import logging
 
-from scrap_villes_a_vivre.information_getter import get_informations_from_url
+from scrap_villes_a_vivre.parser_page import get_informations_from_url
 
 if __name__ == "__main__":
     WEBSITE: str = "https://www.villesavivre.fr/"
