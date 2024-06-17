@@ -1,17 +1,16 @@
 """Define parsers for each sections of the website."""
 
 import logging
-from abc import ABC, abstractmethod
-from itertools import batched
 from typing import ClassVar, Self
 
 from bs4.element import ResultSet, Tag
 
 
-class SectionParser(ABC):
+class SectionParser:
     """Base class for all section parsers."""
 
     _section: Tag
+    _info_balise: str
 
     def __init__(self: Self, section: Tag) -> None:
         """Initiate SectionParser.
@@ -20,9 +19,25 @@ class SectionParser(ABC):
         """
         self._section = section
 
-    @abstractmethod
+    def _get_all_informations(self: Self) -> ResultSet:
+        """Return all usefull informations in the section.
+
+        Returned informations are not formated.
+        """
+
+        def _filter(tag: Tag) -> bool:
+            """Filter the information for each tag in the economie section."""
+            classes: list[str] = tag.get("class") if tag.get("class") else []
+            return tag.name == "div" and (self._info_balise in classes)
+
+        if result := self._section.find_all(_filter):
+            return result
+        message = "No information found !"
+        raise ValueError(message)
+
     def parse(self: Self) -> list[str]:
         """Parse section and return the list of formatted information."""
+        return [str(info.text.strip()) for info in self._get_all_informations()]
 
 
 class SectionParserDummy(SectionParser):
@@ -36,84 +51,19 @@ class SectionParserDummy(SectionParser):
 class SectionParserPopulation(SectionParser):
     """Parser for useless section. It parses nothing."""
 
-    def get_all_informations(self: Self) -> ResultSet:
-        """Return all usefull informations in the section.
+    _info_balise: str = "demo-content"
 
-        Returned informations are not formated.
-        """
 
-        def _filter(tag: Tag) -> bool:
-            """Filter the information for each tag in the economie section."""
-            classes: list[str] = tag.get("class") if tag.get("class") else []
-            return tag.name == "div" and ("demo-content" in classes)
-
-        if result := self._section.find_all(_filter):
-            return result
-        message = "No information found !"
-        raise ValueError(message)
-
-    def parse(self: Self) -> list[str]:
-        """Parse section and return the list of formatted information."""
-        return [str(info.text.strip()) for info in self.get_all_informations()]
-    
 class SectionParserPresentation(SectionParser):
     """Parser for Presentation section."""
 
-    def get_all_informations(self: Self) -> ResultSet:
-        """Return all usefull informations in the section.
-
-        Returned informations are not formated.
-        """
-
-        def _filter(tag: Tag) -> bool:
-            """Filter the information for each tag in the economie section."""
-            classes: list[str] = tag.get("class") if tag.get("class") else []
-            return tag.name == "div" and ("dynamic-content" in classes)
-
-        if result := self._section.find_all(_filter):
-            return result
-        message = "No information found !"
-        raise ValueError(message)
-
-    def parse(self: Self) -> list[str]:
-        """Parse section and return the list of formatted information."""
-        return [str(info.text.strip()) for info in self.get_all_informations()]
+    _info_balise: str = "dynamic-content"
 
 
 class SectionParserEconomie(SectionParser):
-    """Parser for the economie section."""
+    """Parser for Economie section."""
 
-    def get_all_informations(self: Self) -> ResultSet:
-        """Return all usefull informations in the section.
-
-        Returned informations are not formated.
-        """
-
-        def _filter(tag: Tag) -> bool:
-            """Filter the information for each tag in the economie section."""
-            classes: list[str] = tag.get("class", [])
-            return tag.name == "p" and ("source" not in classes)
-
-        if result := self._section.find_all(_filter):
-            return result
-        message = "No information found !"
-        raise ValueError(message)
-
-    def link_number_with_description(self: Self) -> list[str]:
-        """Link number with description."""
-        zipped: list[tuple[Tag, Tag]] = list(
-            batched(self.get_all_informations(), 2),
-        )
-        results: list[str] = []
-        for number, description in zipped:
-            results.append(
-                f"{number.text.strip()} {description.text.strip()}",
-            )
-        return results
-
-    def parse(self: Self) -> list[str]:
-        """Do the same as super."""
-        return self.link_number_with_description()
+    _info_balise: str = "text-content"
 
 
 class GetSectionParser:
