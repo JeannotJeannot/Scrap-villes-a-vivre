@@ -10,7 +10,7 @@ class SectionParser:
     """Base class for all section parsers."""
 
     _section: Tag
-    _info_balise: str
+    _info_balise: ClassVar[set[str]]
 
     def __init__(self: Self, section: Tag) -> None:
         """Initiate SectionParser.
@@ -19,18 +19,17 @@ class SectionParser:
         """
         self._section = section
 
+    def _filter(self: Self, tag: Tag) -> bool:
+        """Filter the information for each tag in the economie section."""
+        classes: list[str] = tag.get("class") if tag.get("class") else []
+        return tag.name == "div" and (self._info_balise.intersection(classes))
+
     def _get_all_informations(self: Self) -> ResultSet:
         """Return all usefull informations in the section.
 
         Returned informations are not formated.
         """
-
-        def _filter(tag: Tag) -> bool:
-            """Filter the information for each tag in the economie section."""
-            classes: list[str] = tag.get("class") if tag.get("class") else []
-            return tag.name == "div" and (self._info_balise in classes)
-
-        if result := self._section.find_all(_filter):
+        if result := self._section.find_all(self._filter):
             return result
         message = "No information found !"
         raise ValueError(message)
@@ -54,19 +53,25 @@ class SectionParserDummy(SectionParser):
 class SectionParserPopulation(SectionParser):
     """Parser for useless section. It parses nothing."""
 
-    _info_balise: str = "demo-content"
+    _info_balise: ClassVar[set[str]] = {"demo-content", }
 
 
 class SectionParserPresentation(SectionParser):
     """Parser for Presentation section."""
 
-    _info_balise: str = "dynamic-content"
+    _info_balise: ClassVar[set[str]] = {"dynamic-content", }
 
 
 class SectionParserEconomie(SectionParser):
     """Parser for Economie section."""
 
-    _info_balise: str = "text-content"
+    _info_balise: ClassVar[set[str]] = {"text-content"}
+
+
+class SectionParserImmobilier(SectionParser):
+    """Parser for Economie section."""
+
+    _info_balise: ClassVar[set[str]] = {"second-circle-content", "card-content"}
 
 
 class GetSectionParser:
@@ -79,8 +84,10 @@ class GetSectionParser:
         "politique": SectionParserDummy,
         "cityhall": SectionParserDummy,
         "compare": SectionParserDummy,
+        "reviews": SectionParserDummy,
         "population": SectionParserPopulation,
         "presentation": SectionParserPresentation,
+        "immobilier": SectionParserImmobilier,
     }
 
     @classmethod

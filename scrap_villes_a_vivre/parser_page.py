@@ -24,7 +24,7 @@ class PageParser:
 
     def get_all_sections(self: Self) -> bs4.element.ResultSet:
         """Return all sections usefull in the web page."""
-        if result := self.page.find_all(name="section", class_="city-content"):
+        if result := self.page.find_all(name="section"):
             return result
         message: str = "No section found !"
         raise ValueError(message)
