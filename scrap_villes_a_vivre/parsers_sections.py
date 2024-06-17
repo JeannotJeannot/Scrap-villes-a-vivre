@@ -1,16 +1,16 @@
 """Define parsers for each sections of the website."""
 
 import logging
+from abc import ABC, abstractmethod
 from typing import ClassVar, Self
 
 from bs4.element import ResultSet, Tag
 
 
-class SectionParser:
+class SectionParser(ABC):
     """Base class for all section parsers."""
 
     _section: Tag
-    _info_balise: ClassVar[set[str]]
 
     def __init__(self: Self, section: Tag) -> None:
         """Initiate SectionParser.
@@ -18,6 +18,46 @@ class SectionParser:
         It needs section as an beautifulsoup.tag to extract informations from.
         """
         self._section = section
+
+    @abstractmethod
+    def parse(self: Self) -> list[str]:
+        """Parse section and return the list of formatted information."""
+
+
+class SectionParserDummy(SectionParser):
+    """Parser for useless section. It parses nothing."""
+
+    def parse(self: Self) -> list[str]:
+        """Parse section and return the list of formatted information."""
+        return []
+
+
+class SectionParserTables(SectionParser):
+    """Parser for tables only."""
+
+    def _get_all_informations(self: Self) -> ResultSet:
+        """Return all usefull informations in the section.
+
+        Returned informations are not formated.
+        """
+        if result := self._section.find_all(name="tr"):
+            return result
+        message = "No information found !"
+        raise ValueError(message)
+
+    def parse(self: Self) -> list[str]:
+        """Parse section and return the list of formatted information."""
+        return [
+            " ".join((info.text.strip()).split())
+            for info in self._get_all_informations()
+        ]
+
+class SectionParserServices(SectionParserTables):
+    """Parser for Services only."""
+class SectionParserBalises(SectionParser):
+    """Parser for balises only."""
+
+    _info_balise: ClassVar[set[str]]
 
     def _filter(self: Self, tag: Tag) -> bool:
         """Filter the information for each tag in the economie section."""
@@ -42,40 +82,34 @@ class SectionParser:
         ]
 
 
-class SectionParserDummy(SectionParser):
-    """Parser for useless section. It parses nothing."""
+class SectionParserPopulation(SectionParserBalises):
+    """Parser for population section."""
 
-    def parse(self: Self) -> list[str]:
-        """Parse section and return the list of formatted information."""
-        return []
+    _info_balise: ClassVar[set[str]] = {"demo-content"}
 
 
-class SectionParserPopulation(SectionParser):
-    """Parser for useless section. It parses nothing."""
-
-    _info_balise: ClassVar[set[str]] = {
-        "demo-content",
-    }
-
-
-class SectionParserPresentation(SectionParser):
+class SectionParserPresentation(SectionParserBalises):
     """Parser for Presentation section."""
 
-    _info_balise: ClassVar[set[str]] = {
-        "dynamic-content",
-    }
+    _info_balise: ClassVar[set[str]] = {"dynamic-content"}
 
 
-class SectionParserEconomie(SectionParser):
+class SectionParserEconomie(SectionParserBalises):
     """Parser for Economie section."""
 
     _info_balise: ClassVar[set[str]] = {"text-content"}
 
 
-class SectionParserImmobilier(SectionParser):
+class SectionParserImmobilier(SectionParserBalises):
     """Parser for Economie section."""
 
     _info_balise: ClassVar[set[str]] = {"second-circle-content", "card-content"}
+
+
+class SectionParserSecurite(SectionParserBalises):
+    """Parser for Economie section."""
+
+    _info_balise: ClassVar[set[str]] = {"city-crime"}
 
 
 class GetSectionParser:
@@ -83,15 +117,17 @@ class GetSectionParser:
 
     _parsers: ClassVar[dict[str, type[SectionParser]]] = {
         "economie": SectionParserEconomie,
+        "population": SectionParserPopulation,
+        "presentation": SectionParserPresentation,
+        "immobilier": SectionParserImmobilier,
+        "securite": SectionParserSecurite,
+        "services":  SectionParserServices,
         "climat": SectionParserDummy,
         "labels": SectionParserDummy,
         "politique": SectionParserDummy,
         "cityhall": SectionParserDummy,
         "compare": SectionParserDummy,
         "reviews": SectionParserDummy,
-        "population": SectionParserPopulation,
-        "presentation": SectionParserPresentation,
-        "immobilier": SectionParserImmobilier,
     }
 
     @classmethod
