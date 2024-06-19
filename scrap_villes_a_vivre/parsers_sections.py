@@ -28,9 +28,10 @@ class FullPageParser:
 
     def _filter(self: Self, tag: Tag) -> bool:
         """Filter the information for each tag in the economie section."""
-        classes: list[str] = tag.get("class") if tag.get("class") else []
+        classes_raw: list[str] | str | None = tag.get("class")
+        classes: list[str] = list(classes_raw) if classes_raw is not None else []
         return (
-            tag.name == "div" and (self._info_balise.intersection(classes))
+            tag.name == "div" and bool(self._info_balise.intersection(classes))
         ) or tag.name == "tr"
 
     def _get_all_informations(self: Self) -> ResultSet:
