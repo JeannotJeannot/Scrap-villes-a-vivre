@@ -52,7 +52,7 @@ class FullPageParser:
     def parse(self: Self) -> list[str]:
         """Parse section and return the list of formatted information."""
         return [
-            " ".join((info.text.strip()).split())
+            " ".join((info.text.replace("\u202f", "").strip().replace(" %", "%")).split())
             for info in self._get_all_informations()
         ]
 
