@@ -7,7 +7,7 @@ import bs4
 from bs4 import BeautifulSoup
 
 from scrap_villes_a_vivre.page_request import get_page
-from scrap_villes_a_vivre.parsers_sections import GetSectionParser, SectionParser
+from scrap_villes_a_vivre.parsers_sections import GetSectionParser, SectionParser, FullPageParser
 
 
 class PageParser:
@@ -32,12 +32,12 @@ class PageParser:
     def get_informations(self: Self) -> list[str]:
         """Return informations about one page."""
         sections: bs4.element.ResultSet = self.get_all_sections()
-        informations: list[str] = []
-        for section in sections:
-            message: str = f"Handling {section['id']}"
-            logging.warning(message)
-            parser: type[SectionParser] = GetSectionParser.get_parser(section["id"])
-            informations.extend(parser(section).parse())
+        informations: list[str] = FullPageParser(self.page).parse()
+        # for section in sections:
+        #     message: str = f"Handling {section['id']}"
+        #     logging.warning(message)
+        #     parser: type[SectionParser] = GetSectionParser.get_parser(section["id"])
+        #     informations.extend(parser(section).parse())
 
         return informations
 

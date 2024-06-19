@@ -32,28 +32,6 @@ class SectionParserDummy(SectionParser):
         return []
 
 
-class SectionParserTables(SectionParser):
-    """Parser for tables only."""
-
-    def _get_all_informations(self: Self) -> ResultSet:
-        """Return all usefull informations in the section.
-
-        Returned informations are not formated.
-        """
-        if result := self._section.find_all(name="tr"):
-            return result
-        message = "No information found !"
-        raise ValueError(message)
-
-    def parse(self: Self) -> list[str]:
-        """Parse section and return the list of formatted information."""
-        return [
-            " ".join((info.text.strip()).split())
-            for info in self._get_all_informations()
-        ]
-
-class SectionParserServices(SectionParserTables):
-    """Parser for Services only."""
 class SectionParserBalises(SectionParser):
     """Parser for balises only."""
 
@@ -62,7 +40,9 @@ class SectionParserBalises(SectionParser):
     def _filter(self: Self, tag: Tag) -> bool:
         """Filter the information for each tag in the economie section."""
         classes: list[str] = tag.get("class") if tag.get("class") else []
-        return tag.name == "div" and (self._info_balise.intersection(classes))
+        return (
+            tag.name == "div" and (self._info_balise.intersection(classes))
+        ) or tag.name == "tr"
 
     def _get_all_informations(self: Self) -> ResultSet:
         """Return all usefull informations in the section.
@@ -85,7 +65,7 @@ class SectionParserBalises(SectionParser):
 class SectionParserPopulation(SectionParserBalises):
     """Parser for population section."""
 
-    _info_balise: ClassVar[set[str]] = {"demo-content"}
+    _info_balise: ClassVar[set[str]] = {"demo-content", "bar"}
 
 
 class SectionParserPresentation(SectionParserBalises):
@@ -103,13 +83,28 @@ class SectionParserEconomie(SectionParserBalises):
 class SectionParserImmobilier(SectionParserBalises):
     """Parser for Economie section."""
 
-    _info_balise: ClassVar[set[str]] = {"second-circle-content", "card-content"}
+    _info_balise: ClassVar[set[str]] = {"second-circle-content", "card-content", "bar"}
 
 
 class SectionParserSecurite(SectionParserBalises):
     """Parser for Economie section."""
 
     _info_balise: ClassVar[set[str]] = {"city-crime"}
+
+
+class SectionParserServices(SectionParserBalises):
+    """Parser for Economie section."""
+
+    _info_balise: ClassVar[set[str]] = {""}
+
+
+class SectionParserNearBy(SectionParserBalises):
+    """Parser for Economie section."""
+
+    _info_balise: ClassVar[set[str]] = {""}
+
+class FullPageParser(SectionParserBalises):
+    _info_balise: ClassVar[set[str]] = {"demo-content", "bar", "dynamic-content","text-content", "second-circle-content", "card-content", "bar", "city-crime"}
 
 
 class GetSectionParser:
@@ -121,7 +116,8 @@ class GetSectionParser:
         "presentation": SectionParserPresentation,
         "immobilier": SectionParserImmobilier,
         "securite": SectionParserSecurite,
-        "services":  SectionParserServices,
+        "services": SectionParserServices,
+        "near-by": SectionParserNearBy,
         "climat": SectionParserDummy,
         "labels": SectionParserDummy,
         "politique": SectionParserDummy,
