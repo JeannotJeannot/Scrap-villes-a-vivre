@@ -4,7 +4,7 @@ import logging
 import re
 from dataclasses import dataclass
 from typing import Self
-
+import pandas as pd
 from scrap_villes_a_vivre.parser_page import get_informations_from_url
 
 WEBSITE: str = "https://www.villesavivre.fr/"
@@ -22,16 +22,18 @@ class TownInformations:
         return WEBSITE + self.url_suffix
 
 
-def get_informations_from_list(informations: list[str], information_regex: str) -> str:
+def get_informations_from_list(informations: list[str], information_regex: str) -> tuple[str]:
     """Return bac+5 for results."""
     r: re.Pattern = re.compile(information_regex)
+    result: tuple[str] = ()
     for data in informations:
         match: re.Match
         if match := r.match(data):
-            return str(match.group("result"))
+            result+= (str(match.group("result")), )
 
-    return "Not found!"
-
+    if result:
+        return result
+    return ("Not found!", )
 
 if __name__ == "__main__":
     versailles: TownInformations = TownInformations("versailles-78646")
@@ -84,9 +86,9 @@ if __name__ == "__main__":
         "Boulangerie": r"^Boulangerie (?P<result>.*)$",
         "Cinéma": r"^Cinéma (?P<result>.*)$",
         "Bibliothèque": r"^Bibliothèque (?P<result>.*)$",
-        "Aeroport": r"^Aeroport (?P<result>.*)$",
+        "Aeroport": r"^Aeroport .*\((?P<result>\d+(,\d+)?) km\)$",
         "Gare SNCF": r"^Gare SNCF (?P<result>.*)$",
-        "Voisin 1": r"^(?P<result>.* à \d+(,\d+)? km)$",
+        "Voisin": r"^(?P<result>.* à \d+(,\d+)? km)$",
         "Logements vacants": r"^(?P<result>\d+(,\d+)?%) Logements vacants$",
         "Résidences principales": r"^(?P<result>\d+(,\d+)?%) Résidences principales$",
         "Résidences secondaires": r"^(?P<result>\d+(,\d+)?%) Résidences secondaires$",
@@ -95,18 +97,22 @@ if __name__ == "__main__":
         "2 pièces": r"^(?P<result>\d+(,\d+)?%) 2 pièces$",
         "3 pièces": r"^(?P<result>\d+(,\d+)?%) 3 pièces$",
         "4 pièces": r"^(?P<result>\d+(,\d+)?%) 4 pièces$",
-        "5 pièces et plus": r"^ 5 pièces et plus$",
+        "5 pièces et plus": r"^(?P<result>\d+(,\d+)?%) 5 pièces et plus$",
         "Crimes et délits": r"^(?P<result>\d+) crimes et délits pour 100 000 habitants.$",
         "Nom": r"^.*\. Le code postal de (?P<result>.+) est \d+\.$",
         "Code postal": r"^.*\. Le code postal de .+ est (?P<result>\d+)\.$",
-        "Evolution du nombre d'habitants": r"^(?P<result>-?\d+(,\d+)?%) Entre 2016 et 2021$",
+        "Evolution du nombre d'habitants": r"^(?P<result>-?\d+(,\d+)?%) Entre \d{4} et \d{4}$",
         "Part de maisons": r"^(?P<result>\d+(,\d+)?%) Maisons$",
         "Part d'appartements": r"^(?P<result>\d+(,\d+)?%) Appartements$",
     }
     logging.warning(informations_formatted)
+    all_infos:  dict[str, str] = {}
     for name, regex in informations_regex.items():
-        logging.warning(
-            name
-            + "        "
-            + get_informations_from_list(informations_formatted, regex),
-        )
+        informations = get_informations_from_list(informations_formatted, regex)
+        for i, info in enumerate(informations):
+            suffix: str = ""
+            if len(informations) > 1: 
+                suffix += " " + str(i)
+            all_infos[name + suffix] = info
+
+    pd.DataFrame.from_records([all_infos, ]).to_csv("toto.csv", sep=";", decimal=",", encoding="latin_1")
