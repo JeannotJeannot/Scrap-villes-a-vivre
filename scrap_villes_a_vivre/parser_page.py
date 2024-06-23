@@ -51,12 +51,16 @@ class FullPageParser:
 
     def parse(self: Self) -> list[str]:
         """Parse section and return the list of formatted information."""
-        return list(set(
-            " ".join(
-                (info.text.replace("\u202f", "").strip().replace(" %", "%")).split(),
+        return list(
+            set(
+                " ".join(
+                    (
+                        info.text.replace("\u202f", "").strip().replace(" %", "%")
+                    ).split(),
+                )
+                for info in self._get_all_informations()
             )
-            for info in self._get_all_informations()
-        ))
+        )
 
 
 def get_informations_from_url(page_url: str) -> list[str]:
